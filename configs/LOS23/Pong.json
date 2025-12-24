@@ -8,7 +8,7 @@
   "os_version": "LOS23",
   "lto": "thin",
   "rust_build": false,
-  "disk_cleanup": false,
+  "disk_cleanup": true,
   "hmbird": false,
   "susfs": true,
   "bbg": true,
