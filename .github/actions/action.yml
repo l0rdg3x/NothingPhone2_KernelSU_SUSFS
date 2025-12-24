@@ -698,7 +698,7 @@ runs:
         echo "::group::Apply SUSFS patches"
         cd "$CONFIG/kernel_platform"
         echo "Applying SUSFS patches..."
-        cp "$GITHUB_WORKSPACE"/susfs4ksu/kernel_patches/50_add_susfs_in_${{ env.SUSFS_KERNEL_BRANCH }}.patch ./common/
+        cp "$GITHUB_WORKSPACE"/susfs4ksu/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch ./common/
         cp "$GITHUB_WORKSPACE"/susfs4ksu/kernel_patches/fs/* ./common/fs/
         cp "$GITHUB_WORKSPACE"/susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
         
