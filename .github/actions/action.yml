@@ -569,13 +569,13 @@ runs:
           echo "Using SUSFS branch/commit: $SUSFS_BRANCH"
         fi
         
-        git clone --depth=1 https://github.com/TheWildJames/AnyKernel3.git -b "$ANYKERNEL_BRANCH" "$GITHUB_WORKSPACE/AnyKernel3"
-        git clone --depth=1 https://github.com/TheWildJames/kernel_patches.git "$GITHUB_WORKSPACE/kernel_patches"
+        git clone --depth=1 https://github.com/TheWildJames/AnyKernel3.git -b "$ANYKERNEL_BRANCH" "$GITHUB_WORKSPACE"/AnyKernel3
+        git clone --depth=1 https://github.com/TheWildJames/kernel_patches.git "$GITHUB_WORKSPACE"/kernel_patches
         
         if [ "${{ env.OP_SUSFS }}" = true ]; then
-          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH" "$GITHUB_WORKSPACE/susfs4ksu"
+          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH" "$GITHUB_WORKSPACE"/susfs4ksu
           
-          cd "$GITHUB_WORKSPACE/susfs4ksu"
+          cd "$GITHUB_WORKSPACE"/susfs4ksu
           
           SUSFS_COMMIT_SHA=$(git rev-parse HEAD)
           SUSFS_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
@@ -698,9 +698,9 @@ runs:
         echo "::group::Apply SUSFS patches"
         cd "$CONFIG/kernel_platform"
         echo "Applying SUSFS patches..."
-        cp "$GITHUB_WORKSPACE/susfs4ksu/kernel_patches/50_add_susfs_in_${{ env.SUSFS_KERNEL_BRANCH }}.patch" ./common/
-        cp "$GITHUB_WORKSPACE/susfs4ksu/kernel_patches/fs/*" ./common/fs/
-        cp "$GITHUB_WORKSPACE/susfs4ksu/kernel_patches/include/linux/*" ./common/include/linux/
+        cp "$GITHUB_WORKSPACE"/susfs4ksu/kernel_patches/50_add_susfs_in_${{ env.SUSFS_KERNEL_BRANCH }}.patch ./common/
+        cp "$GITHUB_WORKSPACE"/susfs4ksu/kernel_patches/fs/* ./common/fs/
+        cp "$GITHUB_WORKSPACE"/susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
         
         susfs_version=$(grep '#define SUSFS_VERSION' ./common/include/linux/susfs.h | awk -F'"' '{print $2}')
         echo "SUSVER=$susfs_version" >> $GITHUB_ENV
@@ -748,7 +748,7 @@ runs:
         fi
         
         patch -p1 < 50_add_susfs_in_${{ env.SUSFS_KERNEL_BRANCH }}.patch
-        cp ../../../kernel_patches/wild/susfs_fix_patches/v2.0.0/Next-3.0.0-susfs-2.0.0-AIO.patch ./
+        cp "$GITHUB_WORKSPACE"/kernel_patches/wild/susfs_fix_patches/v2.0.0/Next-3.0.0-susfs-2.0.0-AIO.patch ./
         patch -p1 < Next-3.0.0-susfs-2.0.0-AIO.patch
 
         # Revert Fake kernel patch
@@ -790,29 +790,29 @@ runs:
         MIN_VERSION="5.16"
         if [ "$(printf '%s\n' "$KERNEL_VERSION" "$MIN_VERSION" | sort -V | head -n1)" = "$KERNEL_VERSION" ]; then
           echo "Patching ptrace!"
-          patch -p1 -F 3 < "../../../kernel_patches/gki_ptrace.patch"
+          patch -p1 -F 3 < "$GITHUB_WORKSPACE/kernel_patches/gki_ptrace.patch"
         else
           echo "Kernel >= $MIN_VERSION, skipping ptrace patch"
         fi
         if [ "$OP_HMBIRD" = true ]; then
           echo "Patching hmbird!"
-          dos2unix "../../../kernel_patches/oneplus/hmbird/fengchi_${OP_MODEL}_${OP_OS_VERSION}.patch"
-          patch -p1 -F 3 < "../../../kernel_patches/oneplus/hmbird/fengchi_${OP_MODEL}_${OP_OS_VERSION}.patch"
+          dos2unix "$GITHUB_WORKSPACE/kernel_patches/oneplus/hmbird/fengchi_${OP_MODEL}_${OP_OS_VERSION}.patch"
+          patch -p1 -F 3 < "$GITHUB_WORKSPACE/kernel_patches/oneplus/hmbird/fengchi_${OP_MODEL}_${OP_OS_VERSION}.patch"
         else
           echo "Hmbird not enabled, skipping fengchi patch"
         fi
         
-        patch -p1 --forward < "../../../kernel_patches/common/optimized_mem_operations.patch"
-        patch -p1 --forward < "../../../kernel_patches/common/file_struct_8bytes_align.patch"
-        patch -p1 --forward < "../../../kernel_patches/common/reduce_cache_pressure.patch"
+        patch -p1 --forward < "$GITHUB_WORKSPACE/kernel_patches/common/optimized_mem_operations.patch"
+        patch -p1 --forward < "$GITHUB_WORKSPACE/kernel_patches/common/file_struct_8bytes_align.patch"
+        patch -p1 --forward < "$GITHUB_WORKSPACE/kernel_patches/common/reduce_cache_pressure.patch"
         if [ "$(printf '%s\n' "$KERNEL_VERSION" "$MIN_VERSION" | sort -V | head -n1)" = "$KERNEL_VERSION" ]; then
-          patch -p1 --forward < "../../../kernel_patches/common/clear_page_16bytes_align.patch"
+          patch -p1 --forward < "$GITHUB_WORKSPACE/kernel_patches/common/clear_page_16bytes_align.patch"
           echo "Patching unicode!"
-          patch -p1 --forward < "../../../kernel_patches/common/unicode_bypass_fix_6.1-.patch"
+          patch -p1 --forward < "$GITHUB_WORKSPACE/kernel_patches/common/unicode_bypass_fix_6.1-.patch"
         else
-          cat "../../../kernel_patches/common/clear_page_16bytes_align.patch" | sed -e 's/SYM_FUNC_START_PI(clear_page)/SYM_FUNC_START_PI(__pi_clear_page)/' | patch -p1 -F3 --forward
+          cat "$GITHUB_WORKSPACE/kernel_patches/common/clear_page_16bytes_align.patch" | sed -e 's/SYM_FUNC_START_PI(clear_page)/SYM_FUNC_START_PI(__pi_clear_page)/' | patch -p1 -F3 --forward
           echo "Patching unicode!"
-          patch -p1 --forward < "../../../kernel_patches/common/unicode_bypass_fix_6.1+.patch"
+          patch -p1 --forward < "$GITHUB_WORKSPACE/kernel_patches/common/unicode_bypass_fix_6.1+.patch"
         fi
         
         echo "✅ Other patches applied"
@@ -825,7 +825,7 @@ runs:
         set -euo pipefail
         echo "::group::Apply KSU hooks"
         cd "$CONFIG/kernel_platform/common"
-        patch -p1 < ../../../kernel_patches/next/scope_min_manual_hooks_v1.4.patch
+        patch -p1 < "$GITHUB_WORKSPACE/kernel_patches/next/scope_min_manual_hooks_v1.4.patch"
         echo "✅ KSU hooks applied"
         echo "::endgroup::"
 
