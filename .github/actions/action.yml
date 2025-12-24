@@ -277,21 +277,26 @@ runs:
         cd "$CONFIG"
         echo "Initializing and syncing kernel source..."
         
-        "$REPO" init -u https://github.com/LineageOS/android.git -b "$OP_BRANCH" --repo-rev=v2.16 --depth=1 --no-clone-bundle --no-tags
 
-        
-        "$REPO" --version
-        success=false
-        for i in 1 2 3; do
-          if "$REPO" sync -c --no-clone-bundle --no-tags --optimized-fetch \
-             -j"$(nproc --all)" --fail-fast; then
-            success=true
-            break
-          fi
-          echo "⚠️ repo sync attempt $i failed; retrying..."
-          sleep 30
-        done
-        $success || { echo "::error::repo sync failed after 3 attempts"; exit 1; }
+        mkdir -p .repo/manifests
+        FORMATTED_BRANCH="android12-5.10-2025-09"
+
+        $REPO init -u https://android.googlesource.com/kernel/manifest \
+          -b common-${FORMATTED_BRANCH} --repo-rev=v2.16
+
+        REMOTE_BRANCH=$(git ls-remote https://android.googlesource.com/kernel/common ${FORMATTED_BRANCH})
+        DEFAULT_MANIFEST_PATH=.repo/manifests/default.xml
+        if grep -q deprecated <<< $REMOTE_BRANCH; then
+          sed -i "s/\"${FORMATTED_BRANCH}\"/\"deprecated\/${FORMATTED_BRANCH}\"/g" $DEFAULT_MANIFEST_PATH
+        fi
+
+        $REPO --trace sync -j$(nproc --all) --fail-fast
+
+        rm -rf "$KERNEL_ROOT/common"
+
+        git clone https://github.com/LineageOS/android_kernel_nothing_sm8475.git --depth 1 kernel_platform/common
+        git clone https://github.com/LineageOS/android_kernel_nothing_sm8475-modules" --depth 1
+        git clone https://github.com/LineageOS/android_kernel_nothing_sm8475-devicetrees" --depth 1
         echo "✅ Kernel source synced"
         echo "::endgroup::"
 
