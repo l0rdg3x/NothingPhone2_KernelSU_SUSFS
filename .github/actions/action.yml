@@ -292,7 +292,7 @@ runs:
 
         $REPO --trace sync -j$(nproc --all) --fail-fast
 
-        rm -rf "$KERNEL_ROOT/common"
+        rm -rf kernel_platform/common
 
         git clone https://github.com/LineageOS/android_kernel_nothing_sm8475.git --depth 1 kernel_platform/common
         git clone https://github.com/LineageOS/android_kernel_nothing_sm8475-modules" --depth 1
