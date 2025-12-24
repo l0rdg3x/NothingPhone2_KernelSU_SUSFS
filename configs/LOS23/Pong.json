@@ -1,7 +1,7 @@
 {
   "model": "Pong",
   "soc": "waipio",
-  "branch": "lineageos-23",
+  "branch": "lineage-23",
   "manifest": "Pong.xml",
   "android_version": "android12",
   "kernel_version": "5.10",
