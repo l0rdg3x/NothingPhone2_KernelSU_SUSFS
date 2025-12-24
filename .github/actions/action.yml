@@ -362,7 +362,7 @@ runs:
         set -euo pipefail
         echo "::group::Set build user/host"
                 
-        BUILD_USER="OnePlus"
+        BUILD_USER="Nothing"
         BUILD_HOST="ubuntu-build"
         
         echo "BUILD_USER=$BUILD_USER" >> "$GITHUB_ENV"
@@ -698,9 +698,9 @@ runs:
         echo "::group::Apply SUSFS patches"
         cd "$CONFIG/kernel_platform"
         echo "Applying SUSFS patches..."
-        cp ../../susfs4ksu/kernel_patches/50_add_susfs_in_${{ env.SUSFS_KERNEL_BRANCH }}.patch ./common/
-        cp ../../susfs4ksu/kernel_patches/fs/* ./common/fs/
-        cp ../../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
+        cp ../../../susfs4ksu/kernel_patches/50_add_susfs_in_${{ env.SUSFS_KERNEL_BRANCH }}.patch ./common/
+        cp ../../../susfs4ksu/kernel_patches/fs/* ./common/fs/
+        cp ../../../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
         
         susfs_version=$(grep '#define SUSFS_VERSION' ./common/include/linux/susfs.h | awk -F'"' '{print $2}')
         echo "SUSVER=$susfs_version" >> $GITHUB_ENV
