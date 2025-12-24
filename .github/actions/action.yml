@@ -21,7 +21,7 @@ inputs:
     description: 'SUSFS branch or commit hash (empty = auto-detect by kernel version)'
     required: false
     type: string
-    default: "${{ inputs.android12-5_10_susfs_branch_or_commit }}"
+    default: ""
   optimize_level:
     description: 'Compiler optimization level (O2 or O3)'
     required: false
@@ -560,29 +560,7 @@ runs:
         ANYKERNEL_BRANCH="gki-2.0"
         
         if [ "${{ env.OP_SUSFS }}" = true ]; then
-          # Determine SUSFS branch/commit to use
-          SUSFS_INPUT="${{ inputs.susfs_commit_hash_or_branch }}"
-          
-          # Default SUSFS branches for each kernel version
-          declare -A DEFAULT_SUSFS=(
-            ["android12-5.10"]="gki-android12-5.10"
-            ["android13-5.15"]="gki-android13-5.15"
-            ["android14-6.1"]="gki-android14-6.1"
-            ["android15-6.6"]="gki-android15-6.6"
-            ["android16-6.12"]="gki-android16-6.12"
-          )
-          
-          # Determine which SUSFS branch to use
-          KERNEL_KEY="${{ env.ANDROID_VER }}-${{ env.KERNEL_VER }}"
-          if [ -z "$SUSFS_INPUT" ] || [ "$SUSFS_INPUT" = "next" ]; then
-            # Empty or "next": use kernel-specific default
-            SUSFS_BRANCH="${DEFAULT_SUSFS[$KERNEL_KEY]:-gki-android15-6.6}"
-            echo "ℹ️  Using default SUSFS branch for $KERNEL_KEY: $SUSFS_BRANCH"
-          else
-            # User provided custom branch/commit
-            SUSFS_BRANCH="$SUSFS_INPUT"
-            echo "🔧 Using custom SUSFS ref: $SUSFS_BRANCH"
-          fi
+          SUSFS_BRANCH="gki-android12-5.10"
         fi
         
         echo "Using AnyKernel3 branch: $ANYKERNEL_BRANCH"
@@ -595,7 +573,7 @@ runs:
         git clone --depth=1 https://github.com/TheWildJames/kernel_patches.git
         
         if [ "${{ env.OP_SUSFS }}" = true ]; then
-          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "${{ inputs.susfs_commit_hash_or_branch }}"
+          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
           
           cd susfs4ksu
           
