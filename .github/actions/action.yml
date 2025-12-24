@@ -569,13 +569,13 @@ runs:
           echo "Using SUSFS branch/commit: $SUSFS_BRANCH"
         fi
         
-        git clone --depth=1 https://github.com/TheWildJames/AnyKernel3.git -b "$ANYKERNEL_BRANCH"
-        git clone --depth=1 https://github.com/TheWildJames/kernel_patches.git
+        git clone --depth=1 https://github.com/TheWildJames/AnyKernel3.git -b "$ANYKERNEL_BRANCH" "$GITHUB_WORKSPACE/AnyKernel3"
+        git clone --depth=1 https://github.com/TheWildJames/kernel_patches.git "$GITHUB_WORKSPACE/kernel_patches"
         
         if [ "${{ env.OP_SUSFS }}" = true ]; then
-          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
+          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH" "$GITHUB_WORKSPACE/susfs4ksu"
           
-          cd susfs4ksu
+          cd "$GITHUB_WORKSPACE/susfs4ksu"
           
           SUSFS_COMMIT_SHA=$(git rev-parse HEAD)
           SUSFS_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
@@ -698,9 +698,9 @@ runs:
         echo "::group::Apply SUSFS patches"
         cd "$CONFIG/kernel_platform"
         echo "Applying SUSFS patches..."
-        cp ../../../susfs4ksu/kernel_patches/50_add_susfs_in_${{ env.SUSFS_KERNEL_BRANCH }}.patch ./common/
-        cp ../../../susfs4ksu/kernel_patches/fs/* ./common/fs/
-        cp ../../../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
+        cp "$GITHUB_WORKSPACE/susfs4ksu/kernel_patches/50_add_susfs_in_${{ env.SUSFS_KERNEL_BRANCH }}.patch" ./common/
+        cp "$GITHUB_WORKSPACE/susfs4ksu/kernel_patches/fs/*" ./common/fs/
+        cp "$GITHUB_WORKSPACE/susfs4ksu/kernel_patches/include/linux/*" ./common/include/linux/
         
         susfs_version=$(grep '#define SUSFS_VERSION' ./common/include/linux/susfs.h | awk -F'"' '{print $2}')
         echo "SUSVER=$susfs_version" >> $GITHUB_ENV
